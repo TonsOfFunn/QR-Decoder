@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Payload Decoder</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --error-color: #cf6679;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-color: #333333;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 3rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary-color);
+            background-color: rgba(187, 134, 252, 0.05);
+        }
+
+        .upload-area p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            color: var(--text-secondary);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .result-container {
+            margin-top: 2rem;
+            text-align: left;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .result-container.active {
+            display: block;
+        }
+
+        .label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .payload-box {
+            background-color: #000000;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            word-break: break-all;
+            white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--secondary-color);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .error-message {
+            margin-top: 1rem;
+            color: var(--error-color);
+            background-color: rgba(207, 102, 121, 0.1);
+            padding: 1rem;
+            border-radius: 6px;
+            display: none;
+            border: 1px solid rgba(207, 102, 121, 0.3);
+        }
+
+        .vt-section {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .vt-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: #394eff; /* VT Blue-ish */
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        .vt-button:hover {
+            background-color: #2f40d4;
+        }
+
+        .vt-icon {
+            margin-right: 8px;
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>QR Code Decoder</h1>
+        
+        <div class="upload-area" id="drop-zone">
+            <span class="upload-icon">📷</span>
+            <p>Drag & Drop, Paste Image, or Click to Upload</p>
+            <input type="file" id="file-input" accept="image/*">
+        </div>
+
+        <div id="error-msg" class="error-message"></div>
+
+        <div id="result-area" class="result-container">
+            <span class="label">Decoded Payload:</span>
+            <div id="payload-content" class="payload-box"></div>
+            
+            <div id="vt-container" class="vt-section">
+                <a id="vt-link" href="#" target="_blank" class="vt-button">
+                    <svg class="vt-icon" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                    Check URL Safety on VirusTotal
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
