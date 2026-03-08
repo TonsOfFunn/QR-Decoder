@@ -48,6 +48,14 @@
             color: var(--text-primary);
         }
 
+        subtitle {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
         .upload-area {
             border: 2px dashed var(--border-color);
             border-radius: 8px;
@@ -163,6 +171,8 @@
 
     <div class="container">
         <h1>QR Code Decoder</h1>
+
+        <subtitle>A small, client-side tool that decodes QR codes from images and shows the raw payload. If the payload is a URL, you can open it on VirusTotal to check it before visiting—no data is sent to any server.</subtitle>
         
         <div class="upload-area" id="drop-zone">
             <span class="upload-icon">📷</span>
